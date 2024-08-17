@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from schemas.user import User, UserCreate
 from services.user_service import (fetch_users, fetch_user_by_id,
-                                   add_user, delete_user)
+                                   add_user, delete_user, users_db)
 from typing import List
 
 router = APIRouter()
@@ -22,9 +22,9 @@ async def get_user(user_id: int):
 
 @router.post("/users/", response_model=User)
 async def create_user(user: UserCreate):
-    new_user = await add_user(user)
-    if new_user is None:
+    if any(u['email'] == user.email for u in users_db):
         raise HTTPException(status_code=400, detail='User already exists')
+    new_user = await add_user(user)
     return new_user
 
 
